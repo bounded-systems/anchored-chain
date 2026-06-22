@@ -4,7 +4,10 @@
   "description": "Derivation chain with contract validation, signing, lineage tracking, and invalidation",
   "bounded": {
     "tagline": "Derivation chain with contract validation, signing, lineage tracking, and invalidation",
-    "kind": "room"
+    "kind": "room",
+    "facet": "noun",
+    "role": "data-structure",
+    "domain": "provenance"
   },
   "license": "MIT",
   "type": "module",
