@@ -3,18 +3,25 @@ import { validateRef, type ValidationCapable, type Verdict } from "./validate.ts
 import type { ContractRegistry } from "./interfaces.ts";
 import type { Digest } from "./types.ts";
 
+/** Store interface combining validation and lineage capabilities. */
 export interface ProjectionCapable extends ValidationCapable, LineageCapable {}
 
+/** Lazy computation of a view over store and contract state. */
 export type Projection<T> = (store: ProjectionCapable, registry: ContractRegistry) => Promise<T>;
 
+/** Validated and staleness-checked view of a named reference. */
 export interface RefProjectionView {
+  /** Current content address of the reference. */
   readonly digest: Digest;
+  /** Validation result against all transitive contracts. */
   readonly verdict: Verdict;
+  /** Digest of the derivation if stale relative to current inputs. */
   readonly staleSince?: Digest;
 }
 
 const ZERO_DIGEST = `sha256:${"0".repeat(64)}` as Digest;
 
+/** Project a single named reference to its validated state and staleness status. */
 export function projectRef(refName: string): Projection<RefProjectionView> {
   return async (store, registry) => {
     const ref = await store.refs.get(refName);
@@ -24,6 +31,7 @@ export function projectRef(refName: string): Projection<RefProjectionView> {
   };
 }
 
+/** Project multiple named references as a snapshot of their validated and staleness states. */
 export function projectMany(
   refNames: readonly string[],
 ): Projection<Readonly<Record<string, RefProjectionView>>> {

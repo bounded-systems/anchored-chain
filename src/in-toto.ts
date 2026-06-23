@@ -10,50 +10,77 @@
 
 import type { Derivation, Digest } from "./types.ts";
 
+/** Standard in-toto Statement v1 type URI. */
 export const STATEMENT_TYPE = "https://in-toto.io/Statement/v1";
+/** Anchored-chain Derivation predicate type URI for in-toto Statements. */
 export const DERIVATION_PREDICATE_TYPE = "https://anchored-chain.dev/Derivation/v0.1";
+/** DSSE payload type for in-toto Statement JSON. */
 export const DSSE_PAYLOAD_TYPE = "application/vnd.in-toto+json";
 
+/** in-toto digest set with algorithm and hex-encoded value. */
 export interface InTotoDigestSet {
+  /** SHA256 hex-encoded digest value. */
   readonly sha256: string;
 }
 
+/** in-toto subject: a named artifact with digests. */
 export interface InTotoSubject {
+  /** Artifact name. */
   readonly name: string;
+  /** Artifact digest set. */
   readonly digest: InTotoDigestSet;
 }
 
+/** in-toto Derivation predicate: producer, inputs, outputs, and enforcement contracts. */
 export interface DerivationPredicate {
+  /** Producer service identifier. */
   readonly producer: string;
+  /** Input artifact digests (materials). */
   readonly materials: Readonly<Record<string, InTotoDigestSet>>;
+  /** Enforced contract identifiers. */
   readonly contracts: readonly string[];
+  /** Production parameters. */
   readonly params: Readonly<Record<string, unknown>>;
 }
 
+/** in-toto Statement v1 over Derivation predicates. */
 export interface InTotoStatement {
+  /** Statement type identifier (always STATEMENT_TYPE). */
   readonly _type: typeof STATEMENT_TYPE;
+  /** Output artifacts (subjects). */
   readonly subject: readonly InTotoSubject[];
+  /** Predicate type identifier (always DERIVATION_PREDICATE_TYPE). */
   readonly predicateType: typeof DERIVATION_PREDICATE_TYPE;
+  /** Derivation predicate. */
   readonly predicate: DerivationPredicate;
 }
 
+/** DSSE signature with optional key identifier. */
 export interface DsseSignature {
+  /** Base64-encoded signature bytes. */
   readonly sig: string;
+  /** Optional key identifier for signature verification. */
   readonly keyid?: string;
 }
 
+/** Dead Simple Signing Envelope (DSSE) container. */
 export interface DsseEnvelope {
+  /** DSSE payload type (always DSSE_PAYLOAD_TYPE). */
   readonly payloadType: typeof DSSE_PAYLOAD_TYPE;
-  readonly payload: string; // base64 of the canonical Statement JSON
+  /** Base64-encoded canonical Statement JSON. */
+  readonly payload: string;
+  /** Array of signatures over the PAE. */
   readonly signatures: readonly DsseSignature[];
 }
 
-// Phase 1 seam: the Sigstore (or dev ed25519) implementation lives outside the
-// extractable core and is injected. Declared here so the core owns the shape.
+/** Protocol for signing DSSE pre-authentication encodings. */
 export interface Signer {
+  /** Sign a DSSE PAE and return a signature. */
   sign(pae: Uint8Array): Promise<DsseSignature>;
 }
+/** Protocol for verifying DSSE signatures. */
 export interface Verifier {
+  /** Verify a DSSE signature over a PAE. */
   verify(pae: Uint8Array, sig: DsseSignature): Promise<boolean>;
 }
 
@@ -77,8 +104,7 @@ function digestSetMap(source: Readonly<Record<string, Digest>>): Record<string, 
   return out;
 }
 
-/** Bespoke manifest → in-toto Statement v1. Outputs become subjects, inputs
- *  become predicate materials. Faithful and reversible. */
+/** Translate derivation manifest to in-toto Statement v1 (outputs→subjects, inputs→materials). */
 export function manifestToStatement(manifest: Derivation["manifest"]): InTotoStatement {
   const subject: InTotoSubject[] = Object.entries(manifest.outputs).map(([name, digest]) => ({
     name,
@@ -97,7 +123,7 @@ export function manifestToStatement(manifest: Derivation["manifest"]): InTotoSta
   };
 }
 
-/** in-toto Statement v1 → bespoke manifest. Inverse of manifestToStatement. */
+/** Translate in-toto Statement v1 to derivation manifest (inverse of manifestToStatement). */
 export function statementToManifest(statement: InTotoStatement): Derivation["manifest"] {
   const inputs: Record<string, Digest> = {};
   for (const [name, set] of Object.entries(statement.predicate.materials)) {
@@ -116,9 +142,7 @@ export function statementToManifest(statement: InTotoStatement): Derivation["man
   };
 }
 
-/** DSSE pre-authentication encoding — the bytes a Signer actually signs.
- *  PAE(type, body) = "DSSEv1 " + len(type) + " " + type + " " + len(body) + " " + body
- *  with lengths over UTF-8 byte counts. */
+/** Compute DSSE pre-authentication encoding: "DSSEv1 <len(type)> <type> <len(payload)> <payload>". */
 export function dssePae(payloadType: string, payload: Uint8Array): Uint8Array {
   const enc = new TextEncoder();
   const typeBytes = enc.encode(payloadType);
@@ -129,8 +153,7 @@ export function dssePae(payloadType: string, payload: Uint8Array): Uint8Array {
   return out;
 }
 
-/** Assemble an unsigned DSSE envelope around a Statement (signatures added in
- *  Phase 1 by a Signer over `dssePae(DSSE_PAYLOAD_TYPE, statementBytes)`). */
+/** Assemble unsigned DSSE envelope and PAE over a Statement (ready for Signer). */
 export function assembleEnvelope(statement: InTotoStatement): {
   envelope: DsseEnvelope;
   pae: Uint8Array;

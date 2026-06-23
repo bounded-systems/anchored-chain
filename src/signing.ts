@@ -19,24 +19,29 @@ import {
 
 import type { Signer, Verifier } from "./in-toto.ts";
 
+/** ed25519 keypair with derived key identifier. */
 export interface Ed25519Keypair {
+  /** Private key object. */
   readonly privateKey: KeyObject;
+  /** Public key object. */
   readonly publicKey: KeyObject;
-  /** sha256 hex over the SPKI DER of the public key. */
+  /** SHA256 hex digest of the SPKI DER-encoded public key. */
   readonly keyid: string;
 }
 
+/** Compute sha256 hex keyid of an ed25519 public key's SPKI DER representation. */
 export function ed25519Keyid(publicKey: KeyObject): string {
   const der = publicKey.export({ type: "spki", format: "der" });
   return createHash("sha256").update(der).digest("hex");
 }
 
+/** Generate a new ed25519 keypair with derived keyid. */
 export function generateEd25519Keypair(): Ed25519Keypair {
   const { privateKey, publicKey } = generateKeyPairSync("ed25519");
   return { privateKey, publicKey, keyid: ed25519Keyid(publicKey) };
 }
 
-/** A `Signer` that signs the DSSE PAE with an ed25519 private key. */
+/** Create a Signer that signs DSSE PAE with ed25519. */
 export function ed25519Signer(privateKey: KeyObject, keyid: string): Signer {
   return {
     async sign(pae: Uint8Array) {
@@ -46,9 +51,7 @@ export function ed25519Signer(privateKey: KeyObject, keyid: string): Signer {
   };
 }
 
-/** A `Verifier` trusting a single ed25519 public key. Verification is
- *  intrinsic to the signature over the PAE — no external table is consulted,
- *  preserving the "authority lives in artifacts" property. */
+/** Create a Verifier that verifies DSSE signatures against a single ed25519 public key. */
 export function ed25519Verifier(publicKey: KeyObject): Verifier {
   return {
     async verify(pae: Uint8Array, sig) {
@@ -84,10 +87,7 @@ const ED25519_PKCS8_DER_PREFIX = Buffer.from("302e020100300506032b657004220420",
 /** SPKI DER prefix for an ed25519 public key (precedes the 32-byte point). */
 const ED25519_SPKI_DER_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
 
-/**
- * Import an ed25519 private key from base64 material: either a raw 32-byte seed
- * (DER-wrapped here) or full PKCS8 DER. Pure `node:crypto`; no env reads.
- */
+/** Import ed25519 private key from base64 (raw 32-byte seed or PKCS8 DER). */
 export function importEd25519PrivateKey(material: string): KeyObject {
   const bytes = Buffer.from(material, "base64");
   const der =
@@ -95,10 +95,7 @@ export function importEd25519PrivateKey(material: string): KeyObject {
   return createPrivateKey({ key: der, format: "der", type: "pkcs8" });
 }
 
-/**
- * Import an ed25519 public key from base64 material: either a raw 32-byte point
- * (DER-wrapped here) or full SPKI DER. Pure `node:crypto`; no env reads.
- */
+/** Import ed25519 public key from base64 (raw 32-byte point or SPKI DER). */
 export function importEd25519PublicKey(material: string): KeyObject {
   const bytes = Buffer.from(material, "base64");
   const der =

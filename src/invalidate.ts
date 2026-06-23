@@ -1,9 +1,15 @@
 import type { Digest } from "./types.ts";
 
+/** Store interface providing invalidation queries over derivation lineage. */
 export interface InvalidationCapable {
-  readonly invalidate: { descendants(movedDigest: Digest): Promise<Digest[]> };
+  /** Invalidation queries. */
+  readonly invalidate: {
+    /** Find derivations invalidated by moving a digest. */
+    descendants(movedDigest: Digest): Promise<Digest[]>
+  };
 }
 
+/** Find all derivations affected by invalidation of a moved digest. */
 export async function descendants(
   store: InvalidationCapable,
   movedDigest: Digest,
