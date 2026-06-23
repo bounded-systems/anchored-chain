@@ -1,0 +1,10 @@
+{
+  "name": {
+    "type": "name",
+    "value": "Anchored Chain"
+  },
+  "description": {
+    "type": "meta",
+    "value": "Derivation chain with contract validation, signing, lineage tracking, and invalidation"
+  }
+}
