@@ -5,6 +5,10 @@
   },
   "description": {
     "type": "meta",
-    "value": "Derivation chain with contract validation, signing, lineage tracking, and invalidation"
+    "value": "A derivation chain with contract validation, signing, lineage tracking, and invalidation — the pure provenance core.  Built directly on the content-addressable substrate (@bounded-systems/cas): every derivation is addressed by the digest of its canonical manifest, signed as an…"
+  },
+  "keywords": {
+    "type": "body",
+    "value": "ANCHORED-CHAIN · DERIVATION · PROVENANCE · IN-TOTO · SIGNING · LINEAGE · CONTENT-ADDRESSABLE"
   }
 }
