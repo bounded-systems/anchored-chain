@@ -1,6 +1,6 @@
 {
   "name": "@bounded-systems/anchored-chain",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Derivation chain with contract validation, signing, lineage tracking, and invalidation",
   "bounded": {
     "tagline": "Derivation chain with contract validation, signing, lineage tracking, and invalidation",
@@ -56,6 +56,6 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@bounded-systems/cas": "npm:@jsr/bounded-systems__cas"
+    "@bounded-systems/cas": "npm:@jsr/bounded-systems__cas@^0.1.2"
   }
 }
