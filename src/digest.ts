@@ -3,10 +3,12 @@ import type { Digest } from "@bounded-systems/cas";
 
 import type { Derivation } from "./types.ts";
 
+/** Serialize a value to canonical (deterministic) JSON with sorted keys. */
 export function canonicalJson(value: unknown): string {
   return JSON.stringify(canonicalize(value));
 }
 
+/** Compute the content-addressed digest of a derivation manifest. */
 export function digestManifest(manifest: Derivation["manifest"]): Digest {
   return sha256Hex(canonicalJson(manifest));
 }

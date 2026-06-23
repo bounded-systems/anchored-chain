@@ -5,20 +5,28 @@ import type { ContractRegistry } from "./interfaces.ts";
 import type { RefStore } from "./ref-store.ts";
 import type { ContractId, Derivation, Digest } from "./types.ts";
 
+/** Result of validating a derivation against its contracts. */
 export type Verdict =
   | { readonly ok: true }
   | {
       readonly ok: false;
+      /** Derivation where validation failed. */
       readonly failedAt: Digest;
+      /** Contract that failed. */
       readonly contract: ContractId;
+      /** Failure reason. */
       readonly reason: string;
     };
 
+/** Store interface required for validation queries. */
 export interface ValidationCapable {
+  /** Reference getter. */
   readonly refs: Pick<RefStore, "get">;
+  /** Derivation getter. */
   readonly derivations: Pick<DerivationStore, "get">;
 }
 
+/** Options for signature verification during derivation validation. */
 export interface VerifyOptions {
   /** When set, signatures present on a derivation are checked against it. */
   readonly verifier?: Verifier;
@@ -28,6 +36,7 @@ export interface VerifyOptions {
 
 const ZERO_DIGEST = `sha256:${"0".repeat(64)}` as Digest;
 
+/** Validate a named reference against its derivation chain and contracts. */
 export async function validateRef(
   refName: string,
   store: ValidationCapable,
@@ -46,6 +55,7 @@ export async function validateRef(
   return validateDerivation(ref.digest, store.derivations, registry, options);
 }
 
+/** Validate a derivation and its transitive inputs against all contracts in the chain. */
 export async function validateDerivation(
   derivationId: Digest,
   store: Pick<DerivationStore, "get">,
