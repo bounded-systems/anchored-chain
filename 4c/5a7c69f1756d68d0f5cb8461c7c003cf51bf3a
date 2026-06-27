@@ -1,0 +1,25 @@
+src/__tests__/dsse-interop.test.ts
+  s_8bfe0e8de6557c::t_aad2983d373027 1-101
+src/__tests__/extractability.test.ts
+  s_8bfe0e8de6557c::t_63648b5a936492 16-18
+package.json
+  s_8bfe0e8de6557c::t_c2e4a59f05106b 56
+bun.lock
+  s_8bfe0e8de6557c::t_b35223e1428578 12,23-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "4c5a7c69f1756d68d0f5cb8461c7c003cf51bf3a",
+  "prompts": {},
+  "sessions": {
+    "s_8bfe0e8de6557c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "159cecef-b114-4932-b219-6b198cbf9abd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Robert DeLanghe <1240090+bdelanghe@users.noreply.github.com>"
+    }
+  }
+}
