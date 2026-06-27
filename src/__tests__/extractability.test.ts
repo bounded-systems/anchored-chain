@@ -13,6 +13,8 @@ test("@bounded-systems/anchored-chain upholds its seam claim", () => {
   assertSeam({
     root: SRC,
     prod: ["node:crypto", "@bounded-systems/cas"],
-    test: ["@bounded-systems/anchored-chain", "@bounded-systems/seam-check"],
+    // @noble/ed25519 is a TEST-only, independent verifier (prx-5lcd interop proof);
+    // prod still touches node:crypto only.
+    test: ["@bounded-systems/anchored-chain", "@bounded-systems/seam-check", "@noble/ed25519"],
   });
 });
